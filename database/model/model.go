@@ -14,10 +14,15 @@ type User struct {
 	Password string `json:"password"`
 }
 
+type Customer struct {
+	*gorm.Model
+	PhoneNumber string `json:"phone_number"`
+}
+
 func migrate() error {
 	fmt.Println("Migrating the schema...")
 
-	err := db.AutoMigrate(&User{})
+	err := db.AutoMigrate(&User{}, &Customer{})
 
 	if err != nil {
 		fmt.Println("Error migrating the schema")

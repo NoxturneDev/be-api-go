@@ -19,4 +19,9 @@ func Routes(app *fiber.App) {
 	app.Get("/ws/:id", websocket.New(func(c *websocket.Conn) {
 		handler.WebsocketHandler(c)
 	}))
+
+	// customers
+	app.Get("/api/customers", handler.GetCustomers)
+	app.Get("/api/customers/:id", handler.GetCustomer)
+	app.Delete("/api/customers/:id", handler.DeleteCustomer)
 }
