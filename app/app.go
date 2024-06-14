@@ -5,6 +5,7 @@ import (
 	"github.com/gofiber/contrib/websocket"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"log"
 )
 
 func Serve() {
@@ -23,7 +24,9 @@ func Serve() {
 		}
 		return fiber.ErrUpgradeRequired
 	})
-
 	Routes(app)
-	app.Listen(":3001")
+	err := app.Listen(":3001")
+	if err != nil {
+		log.Printf("Error starting server: %v", err)
+	}
 }

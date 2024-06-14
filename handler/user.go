@@ -88,3 +88,31 @@ func DeleteUser(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"message": "User deleted successfully"})
 
 }
+
+func LoginUser(c *fiber.Ctx) error {
+	var requestLogin struct {
+		Username string `json:"username"`
+		Password string `json:"password"`
+	}
+
+	if err := c.BodyParser(&requestLogin); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	if err := database.DB.Where("username = ?", requestLogin.Username).First(&model.Users{}).Error; err != nil {
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{
+			"error": "User not found",
+		})
+	}
+	if err := database.DB.Where("username = ? AND password = ?", requestLogin.Username, requestLogin.Password).First(&model.Users{}).Error; err != nil {
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{
+			"error": "Incorrect password",
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "Login success",
+	})
+}

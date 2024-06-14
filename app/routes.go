@@ -12,7 +12,7 @@ func Routes(app *fiber.App) {
 	app.Post("/api/user", handler.CreateUser)
 	app.Put("/api/user", handler.UpdateUser)
 	app.Delete("/api/user/:id", handler.DeleteUser)
-
+	app.Post("/api/user/login", handler.LoginUser)
 	app.Get("/api/ai/test", handler.TestAIconnection)
 
 	//	ws
