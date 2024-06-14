@@ -6,6 +6,7 @@ require (
 	github.com/gofiber/contrib/websocket v1.3.1
 	github.com/gofiber/fiber/v2 v2.52.4
 	github.com/google/generative-ai-go v0.14.0
+	github.com/gorilla/websocket v1.5.3
 	github.com/joho/godotenv v1.5.1
 	google.golang.org/api v0.180.0
 	gorm.io/driver/postgres v1.5.9
