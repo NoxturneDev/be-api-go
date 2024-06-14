@@ -116,3 +116,9 @@ func LoginUser(c *fiber.Ctx) error {
 		"message": "Login success",
 	})
 }
+
+func LogoutUser(c *fiber.Ctx) error {
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "Logout success",
+	})
+}
