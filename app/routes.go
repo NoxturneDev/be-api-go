@@ -2,6 +2,7 @@ package app
 
 import (
 	"be-api-go/handler"
+	"github.com/gofiber/contrib/websocket"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -13,4 +14,9 @@ func Routes(app *fiber.App) {
 	app.Delete("/api/user/:id", handler.DeleteUser)
 
 	app.Get("/api/ai/test", handler.TestAIconnection)
+
+	//	ws
+	app.Get("/ws/:id", websocket.New(func(c *websocket.Conn) {
+		handler.WebsocketHandler(c)
+	}))
 }
