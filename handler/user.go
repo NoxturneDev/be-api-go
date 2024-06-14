@@ -2,12 +2,12 @@ package handler
 
 import (
 	"be-api-go/database"
-	"be-api-go/database/model"
+	"be-api-go/model"
 	"github.com/gofiber/fiber/v2"
 )
 
 func GetUsers(c *fiber.Ctx) error {
-	var users []model.User
+	var users []model.Users
 
 	database.DB.Find(&users)
 
@@ -16,7 +16,7 @@ func GetUsers(c *fiber.Ctx) error {
 
 func GetUser(c *fiber.Ctx) error {
 	id := c.Params("id")
-	var user model.User
+	var user model.Users
 
 	if err := database.DB.First(&user, id).Error; err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "User not found"})
@@ -35,7 +35,7 @@ func CreateUser(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	newUser := model.User{
+	newUser := model.Users{
 		Username: req.Username,
 		Password: req.Password,
 	}
@@ -58,7 +58,7 @@ func UpdateUser(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	var user model.User
+	var user model.Users
 	if err := database.DB.First(&user, req.UserId).Error; err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "User not found"})
 	}
@@ -75,7 +75,7 @@ func UpdateUser(c *fiber.Ctx) error {
 
 func DeleteUser(c *fiber.Ctx) error {
 	id := c.Params("id")
-	var user model.User
+	var user model.Users
 
 	if err := database.DB.First(&user, id).Error; err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "User not found"})
