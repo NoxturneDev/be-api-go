@@ -7,6 +7,6 @@ import (
 
 func main() {
 	database.ConnectionDB()
-	//database.Migrate()
+	database.Migrate()
 	app.Serve()
 }
