@@ -35,16 +35,24 @@ type Products struct {
 
 type ChatRooms struct {
 	*gorm.Model
-	SellerId int     `json:"seller_id"`
-	Chats    []Chats `json:"chats" gorm:"foreignKey:ChatRoomId;references:ID"`
+	SellerId    int     `json:"seller_id"`
+	Chats       []Chats `json:"chats" gorm:"foreignKey:ChatRoomId;references:ID"`
+	PhoneNumber string  `json:"phone_number"`
 }
 
 type Chats struct {
 	*gorm.Model
-	ChatRoomId  int    `json:"chat_room_id"`
-	SellerId    *int   `json:"seller_id"`
-	Sender      string `json:"sender"`
-	Receiver    string `json:"receiver"`
-	PhoneNumber string `json:"phone_number"`
-	Chat        string `gorm:"type:text"`
+	ChatRoomId int    `json:"chat_room_id"`
+	SellerId   *int   `json:"seller_id"`
+	Sender     string `json:"sender"`
+	Receiver   string `json:"receiver"`
+	Chat       string `gorm:"type:text"`
+}
+
+type ChatPrompts struct {
+	*gorm.Model
+	ChatId int
+	Chats  Chats  `gorm:"foreignKey:ChatId;references:ID"`
+	Prompt string `json:"prompt" gorm:"type:text"`
+	Result string `json:"result" gorm:"type:text"`
 }
