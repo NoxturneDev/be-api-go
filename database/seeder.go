@@ -16,6 +16,7 @@ func Migrate() error {
 	err = DB.AutoMigrate(&model.ChatRooms{})
 	err = DB.AutoMigrate(&model.Chats{})
 	err = DB.AutoMigrate(&model.ChatPrompts{})
+	err = DB.AutoMigrate(&model.Notifications{})
 
 	if err != nil {
 		fmt.Printf("Error migrating the schema%v", err)
