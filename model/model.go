@@ -18,11 +18,12 @@ type Customers struct {
 
 type Sellers struct {
 	*gorm.Model
-	Name        string      `json:"name"`
-	Description string      `json:"description"`
-	Category    string      `json:"category"`
-	Products    []Products  `json:"products" gorm:"foreignKey:SellerId;references:ID"`
-	ChatRooms   []ChatRooms `json:"chat_rooms" gorm:"foreignKey:SellerId;references:ID"`
+	Name          string          `json:"name"`
+	Description   string          `json:"description"`
+	Category      string          `json:"category"`
+	Products      []Products      `json:"products" gorm:"foreignKey:SellerId;references:ID"`
+	ChatRooms     []ChatRooms     `json:"chat_rooms" gorm:"foreignKey:SellerId;references:ID"`
+	Notifications []Notifications `json:"notifications" gorm:"foreignKey:SellerId;references:ID"`
 }
 
 type Products struct {
@@ -55,4 +56,12 @@ type ChatPrompts struct {
 	Chats  Chats  `gorm:"foreignKey:ChatId;references:ID"`
 	Prompt string `json:"prompt" gorm:"type:text"`
 	Result string `json:"result" gorm:"type:text"`
+}
+
+type Notifications struct {
+	*gorm.Model
+	SellerId    int     `json:"seller_id"`
+	Sellers     Sellers `gorm:"foreignKey:SellerId;references:ID"`
+	PhoneNumber string  `json:"phone_number"`
+	Status      int     `gorm:"default:0"` // 1 accpeted, 0 not accepted
 }
