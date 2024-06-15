@@ -2,6 +2,7 @@ package app
 
 import (
 	"be-api-go/handler"
+	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/valyala/fasthttp/fasthttpadaptor"
 	"net/http"
@@ -25,6 +26,24 @@ func Routes(app *fiber.App) {
 	//app.Get("/ws/:id", websocket.New(func(c *websocket.Conn) {
 	//	handler.AiWebsocketHandler(c)
 	//}))
+
+	app.Get("/ws/notification", func(c *fiber.Ctx) error {
+		var err error
+		var writer http.ResponseWriter
+		var request *http.Request
+		fasthttpadaptor.NewFastHTTPHandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			writer = w
+			request = r
+		})(c.Context())
+
+		handler.NotificationHandler(writer, request)
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+
+		return nil
+	})
 
 	app.Get("/ws/ai", func(c *fiber.Ctx) error {
 		var writer http.ResponseWriter
