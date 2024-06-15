@@ -11,6 +11,10 @@ func Migrate() error {
 
 	err = DB.AutoMigrate(&model.Users{})
 	err = DB.AutoMigrate(&model.Customers{})
+	err = DB.AutoMigrate(&model.Sellers{})
+	err = DB.AutoMigrate(&model.Products{})
+	err = DB.AutoMigrate(&model.ChatRooms{})
+	err = DB.AutoMigrate(&model.Chats{})
 
 	if err != nil {
 		fmt.Printf("Error migrating the schema%v", err)
