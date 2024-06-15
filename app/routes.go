@@ -36,4 +36,19 @@ func Routes(app *fiber.App) {
 
 		return nil
 	})
+
+	// sellers
+	app.Get("/api/sellers", handler.GetSellers)
+	app.Get("/api/seller/chat/:id", handler.GetSellerChatRooms)
+	app.Put("/api/seller", handler.UpdateSeller)
+	app.Delete("/api/seller/:id", handler.DeleteSeller)
+	app.Get("/api/seller/:id", handler.GetSeller)
+	app.Post("/api/seller/create", handler.CreateSeller)
+
+	// products
+	app.Get("/api/products", handler.GetProducts)
+	app.Get("/api/product/:id", handler.GetProduct)
+	app.Post("/api/product", handler.CreateProduct)
+	app.Put("/api/product", handler.UpdateProduct)
+	app.Delete("/api/product/:id", handler.DeleteProduct)
 }
