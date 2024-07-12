@@ -4,8 +4,10 @@ import (
 	"be-api-go/model"
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/google/generative-ai-go/genai"
 	"github.com/gorilla/websocket"
+	"log"
 	"net/http"
 )
 
@@ -17,7 +19,24 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-var connections = make([]*WebSocketConnection, 0)
+type Clients struct {
+	PhoneNumber string
+	Conn        *websocket.Conn
+	Pool        *Connections
+}
+
+type Connections struct {
+	Clients    map[*Clients]bool
+	Register   chan *Clients
+	Unregister chan *Clients
+	Broadcast  chan Message
+}
+
+type Message struct {
+	Message string `json:"message"`
+}
+
+var poolConnections = make([]*Clients, 0)
 
 type AI struct {
 	GenerativeModel *genai.GenerativeModel
@@ -57,154 +76,31 @@ type SocketPayloadNotification struct {
 	SellerId    int    `json:"seller_id"`
 }
 
-//
-//import (
-//	"context"
-//	"errors"
-//	"fmt"
-//	"google.golang.org/api/iterator"
-//	"google.golang.org/api/option"
-//	"log"
-//	"os"
-//
-//	"github.com/google/generative-ai-go/genai"
-//	"github.com/gorilla/websocket"
-//	"github.com/joho/godotenv"
-//)
-//
-//func WebsocketHandler(c *websocket.Conn) error {
-//	// c.Locals is added to the *websocket.Conn
-//	log.Println(c.Locals("allowed"))  // true
-//	log.Println(c.Params("id"))       // 123
-//	log.Println(c.Query("v"))         // 1.0
-//	log.Println(c.Cookies("session")) // ""
-//
-//	// websocket.Conn bindings https://pkg.go.dev/github.com/fasthttp/websocket?tab=doc#pkg-index
-//	var (
-//		mt  int
-//		msg []byte
-//		err error
-//	)
-//	for {
-//		if mt, msg, err = c.ReadMessage(); err != nil {
-//			log.Println("read:", err)
-//			break
-//		}
-//		log.Printf("recv: %s", msg)
-//
-//		if err = c.WriteMessage(mt, msg); err != nil {
-//			log.Println("write:", err)
-//			break
-//		}
-//	}
-//
-//	return nil
-//}
-//
-////func AiWebsocketHandler(c *websocket.Conn) error {
-////	log.Println(c.Locals("allowed"))  // true
-////	log.Println(c.Params("id"))       // 123
-////	log.Println(c.Query("v"))         // 1.0
-////	log.Println(c.Cookies("session")) // ""
-////
-////	// websocket.Conn bindings https://pkg.go.dev/github.com/fasthttp/websocket?tab=doc#pkg-index
-////	var (
-////		mt  int
-////		msg []byte
-////		err error
-////	)
-////
-////	for {
-////		if mt, msg, err = c.ReadMessage(); err != nil {
-////			log.Println("read:", err)
-////			break
-////		}
-////		log.Printf("recv: %s", msg)
-////
-////		if err = c.WriteMessage(mt, msg); err != nil {
-////			log.Println("write:", err)
-////			break
-////		}
-////	}
-////
-////	err = godotenv.Load()
-////	if err != nil {
-////		log.Fatal("Error loading .env file")
-////	}
-////
-////	geminiApiKey := os.Getenv("GEMINI_API_KEY")
-////
-////	// Access your API key as an environment variable (see "Set up your API key" above)
-////	mdl.Context = context.Background()
-////	client, err := genai.NewClient(mdl.Context, option.WithAPIKey(geminiApiKey))
-////	if err != nil {
-////		fmt.Println(err)
-////	}
-////
-////	defer client.Close()
-////	mdl.GenerativeModel = client.GenerativeModel("gemini-1.5-flash")
-////
-////	iter := mdl.GenerativeModel.GenerateContentStream(mdl.Context, genai.Text("Tell me a story about a lumberjack and his giant ox. Keep it very short."))
-////	for {
-////		_, err := iter.Next()
-////		if errors.Is(err, iterator.Done) {
-////			break
-////		}
-////		if err != nil {
-////			return err
-////		}
-////
-////	}
-////
-////	return nil
-////}
-//
-//func AiWebsocketHandler(c *websocket.Conn) error {
-//	log.Println(c.Locals("allowed"))  // true
-//	log.Println(c.Params("id"))       // 123
-//	log.Println(c.Query("v"))         // 1.0
-//	log.Println(c.Cookies("session")) // ""
-//
-//	// Load environment variables
-//	err := godotenv.Load()
-//	if err != nil {
-//		log.Fatal("Error loading .env file")
-//	}
-//
-//	// Set up API key and client
-//	geminiApiKey := os.Getenv("GEMINI_API_KEY")
-//	ctx := context.Background()
-//	client, err := genai.NewClient(ctx, option.WithAPIKey(geminiApiKey))
-//	if err != nil {
-//		fmt.Println(err)
-//		return c.WriteMessage(websocket.TextMessage, []byte("Failed to create AI client"))
-//	}
-//	defer client.Close()
-//
-//	// Set up the model
-//	//model := client.GenerativeModel("gemini-1.5-flash")
-//
-//	// Generate content stream
-//
-//	c.Locals()
-//	//iter := model.GenerateContentStream(ctx, genai.Text("Tell me a story about a lumberjack and his giant ox. Keep it very short."))
-//	//for {
-//	//	resp, err := iter.Next()
-//	//	if errors.Is(err, iterator.Done) {
-//	//		break
-//	//	}
-//	//	if err != nil {
-//	//		log.Println("stream error:", err)
-//	//		return c.WriteMessage(websocket.TextMessage, []byte("Error occurred during stream"))
-//	//	}
-//	//
-//	//	// Send each response chunk to the WebSocket client
-//	//	log.Println("Sending message:", resp)
-//	//	//if err := c.WriteMessage(websocket.TextMessage, message); err != nil {
-//	//	//	log.Println("write error:", err)
-//	//	//	break
-//	//	//}
-//	//}
-//
-//	return nil
-//}
+func NewConnectionPool() *Connections {
+	return &Connections{
+		Clients:    make(map[*Clients]bool),
+		Register:   make(chan *Clients),
+		Unregister: make(chan *Clients),
+		Broadcast:  make(chan Message),
+	}
+}
+
+func (c *Clients) Read() {
+	defer func() {
+		fmt.Println("closing connection from: ", c.PhoneNumber)
+		c.Pool.Unregister <- c
+		c.Conn.Close()
+	}()
+
+	for {
+		var message Message
+		err := c.Conn.ReadJSON(&message)
+		if err != nil {
+			log.Printf("error on reading json message %v", err)
+			return
+
+		}
+		c.Pool.Broadcast <- message
+		fmt.Println("Message Received: ", message)
+	}
+}
